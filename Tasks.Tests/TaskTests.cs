@@ -17,6 +17,7 @@ namespace Tasks.Tests
             "baidu", "amazon"
         };
 
+        #region GetUrlContent
         [TestMethod]
         [TestCategory("GetUrlContent")]
         public void GetUrlContent_Should_Return_Content()
@@ -30,8 +31,10 @@ namespace Tasks.Tests
         {
             Action<Uri> action = (uri) => (new[] { uri }).GetUrlContent().ToArray();
             Check_Is_Action_Asynchronous(action, false);
-        }
+        } 
+        #endregion
 
+        #region GetUrlContentAsync
         [TestMethod]
         [TestCategory("GetUrlContentAsync")]
         public void GetUrlContentAsync_Should_Return_Content()
@@ -74,8 +77,10 @@ namespace Tasks.Tests
         {
             Action<Uri> action = (uri) => (new[] { uri }).GetUrlContentAsync(2).ToArray();
             Check_Is_Action_Asynchronous(action, true);
-        }
+        } 
+        #endregion
 
+        #region GetUrlMD5
         [TestMethod]
         [TestCategory("GetUrlMD5")]
         public void GetUrlMD5_Should_Return_CorrectValue()
@@ -89,7 +94,8 @@ namespace Tasks.Tests
         public void GetUrlMD5_Should_Run_Asynchronous()
         {
             Check_Is_Action_Asynchronous(GetMD5Wrapper, true);
-        }
+        } 
+        #endregion
 
         #region Private Methods 
         private IEnumerable<Uri> GetTestUris()
