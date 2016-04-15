@@ -5,7 +5,7 @@ bit more complex and sophisticated.
 
 NOTE:
 
-1.	Use can see the debug information during test if îpen Output window select output from "Debug". Hope it 
+1.	Use can see the debug information during test if open Output window select output from "Debug". Hope it 
 	helps you understand the request-response flow. It works in Debug mode only.
 
 2.	Please check the performance of GetUrlContent against GetUrlContentAsync
