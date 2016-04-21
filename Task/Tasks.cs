@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Threading;
 namespace Task
 {
     public static class Tasks
@@ -17,8 +23,17 @@ namespace Task
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContent(this IEnumerable<Uri> uris)
         {
-            // TODO : Implement GetUrlContent
-            throw new NotImplementedException();
+            List<string> content = new List<string>();
+            using (WebClient client = new WebClient())
+            {
+                foreach (var uri in uris)
+                {
+                    Stopwatch timer = Stopwatch.StartNew();
+                    content.Add(client.DownloadString(uri));
+                    Debug.WriteLine(uri + " " + timer.Elapsed);
+                }
+            }
+            return content;
         }
 
         /// <summary>
@@ -33,9 +48,20 @@ namespace Task
         /// <returns>The sequence of downloaded url content</returns>
         public static IEnumerable<string> GetUrlContentAsync(this IEnumerable<Uri> uris, int maxConcurrentStreams)
         {
-            // TODO : Implement GetUrlContentAsync
-            throw new NotImplementedException();
+            HttpClient client = new HttpClient();
+
+            var urisList = uris.ToList();
+            var result = new string[urisList.Count];
+            ParallelOptions options = new ParallelOptions { MaxDegreeOfParallelism = maxConcurrentStreams };
+            Parallel.For(0, urisList.Count, i =>
+            {
+                result[i] = client.GetStringAsync(urisList[i]).Result;
+                Debug.WriteLine($"Number {i}: {Thread.CurrentThread.ManagedThreadId} {Thread.CurrentThread.IsThreadPoolThread}");
+
+            });
+            return result;
         }
+
 
         /// <summary>
         /// Calculates MD5 hash of required resource.
@@ -45,10 +71,33 @@ namespace Task
         /// </summary>
         /// <param name="resource">Uri of resource</param>
         /// <returns>MD5 hash</returns>
-        public static Task<string> GetMD5Async(this Uri resource)
+        public static async Task<string> GetMD5Async(this Uri resource)
         {
-            // TODO : Implement GetMD5Async
-            throw new NotImplementedException();
+            using (WebClient client = new WebClient())
+            {
+                var resourceData = await client.DownloadDataTaskAsync(resource);
+
+                return await GetMD5Async(resourceData);
+            }
+        }
+
+        private static Task<string> GetMD5Async(byte[] data)
+        {
+            Task<string> getHash = System.Threading.Tasks.Task.Run(() =>
+            {
+                using (var md5 = MD5.Create())
+                {
+                    var hash = md5.ComputeHash(data);
+                    StringBuilder sBuilder = new StringBuilder();
+                    foreach (byte b in hash)
+                    {
+                        sBuilder.Append(b.ToString("x2"));
+                    }
+                    return sBuilder.ToString();
+                }
+            });
+
+            return getHash;
         }
     }
 }
