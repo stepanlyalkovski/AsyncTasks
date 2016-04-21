@@ -75,19 +75,19 @@ namespace Task
         {
             using (WebClient client = new WebClient())
             {
+                Debug.WriteLine("Before download: " + Thread.CurrentThread.ManagedThreadId + " "
+                                          + Thread.CurrentThread.IsThreadPoolThread);
                 var resourceData = await client.DownloadDataTaskAsync(resource);
 
-                return await GetMD5Async(resourceData);
-            }
-        }
+                Debug.WriteLine("After download: " + Thread.CurrentThread.ManagedThreadId + " "
+                                       + Thread.CurrentThread.IsThreadPoolThread);
 
-        private static Task<string> GetMD5Async(byte[] data)
-        {
-            Task<string> getHash = System.Threading.Tasks.Task.Run(() =>
-            {
                 using (var md5 = MD5.Create())
                 {
-                    var hash = md5.ComputeHash(data);
+                    Debug.WriteLine("MD5 thread: " + Thread.CurrentThread.ManagedThreadId + " "
+                                       + Thread.CurrentThread.IsThreadPoolThread);
+
+                    var hash = md5.ComputeHash(resourceData);
                     StringBuilder sBuilder = new StringBuilder();
                     foreach (byte b in hash)
                     {
@@ -95,9 +95,7 @@ namespace Task
                     }
                     return sBuilder.ToString();
                 }
-            });
-
-            return getHash;
+            }
         }
     }
 }
